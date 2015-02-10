@@ -17,6 +17,7 @@ def server_socket_function():
                 conn.sendall("I recieved your message. Stop talking to me. You are annoying.")
     except KeyboardInterrupt:
         conn.close()
+        server_socket.close()
 
 
 def response_ok():
