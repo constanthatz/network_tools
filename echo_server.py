@@ -16,4 +16,4 @@ def server_socket_function():
 
 
 if __name__ == '__main__':
-    server_socker_function()
+    server_socket_function()
