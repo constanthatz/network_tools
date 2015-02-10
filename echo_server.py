@@ -3,6 +3,7 @@ from __future__ import print_function
 import socket
 import email.utils
 
+
 def server_socket_function():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_IP)
     server_socket.bind(('127.0.0.1', 50000))
@@ -18,24 +19,32 @@ def server_socket_function():
         conn.close()
 
 
-def response_ok(conn):
+def response_ok():
     first_line = 'HTTP/1.1 200 OK'
     timestamp = email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
     crlf = '<CRLF>'
     response = ('{}\nDate: {}\n{}\n{}').format(
         first_line, timestamp, content_header, crlf)
-    conn.sendall(response)
-    return
+    return response
 
 
 def response_error():
-    return
+    error_code = '404'
+    error_text = 'Not Found'
+    first_line = 'HTTP/1.1 {} {}'.format(error_code, error_text)
+    timestamp = email.utils.formatdate(usegmt=True)
+    content_header = 'Content-Type: text/plain'
+    crlf = '<CRLF>'
+    response = ('{}\nDate: {}\n{}\n{}').format(
+        first_line, timestamp, content_header, crlf)
+    return response
 
 
 def parse_request():
     return
 
+print(response_ok())
 
-if __name__ == '__main__':
-    server_socket_function()
+# if __name__ == '__main__':
+    # server_socket_function()
