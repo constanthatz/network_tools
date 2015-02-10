@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import socket
-
+import email.utils
 
 def server_socket_function():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_IP)
@@ -18,7 +18,14 @@ def server_socket_function():
         conn.close()
 
 
-def response_ok():
+def response_ok(conn):
+    first_line = 'HTTP/1.1 200 OK'
+    timestamp = email.utils.formatdate(usegmt=True)
+    content_header = 'Content-Type: text/plain'
+    crlf = '<CRLF>'
+    response = ('{}\nDate: {}\n{}\n{}').format(
+        first_line, timestamp, content_header, crlf)
+    conn.sendall(response)
     return
 
 
