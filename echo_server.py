@@ -18,5 +18,17 @@ def server_socket_function():
         conn.close()
 
 
+def response_ok():
+    return
+
+
+def response_error():
+    return
+
+
+def parse_request():
+    return
+
+
 if __name__ == '__main__':
     server_socket_function()
