@@ -4,7 +4,7 @@ import socket
 import sys
 
 
-def client_socket_funciton(message):
+def client_socket_function(message):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_IP)
     client_socket.connect(('127.0.0.1', 50000))
     client_socket.sendall(message)
