@@ -5,18 +5,18 @@ import pytest
 import email.utils
 
 
-# @pytest.fixture(scope='module')
-# def server(request):
-#     """set up and tear down a server"""
+@pytest.fixture(scope='module')
+def server(request):
+    """set up and tear down a server"""
 
-#     process = subprocess.Popen('./echo_server.py', shell=True)
+    process = subprocess.Popen('./echo_server.py', shell=True)
 
-#     def cleanup():
-#         process.kill()
+    def cleanup():
+        process.kill()
 
-#     request.addfinalizer(cleanup)
+    request.addfinalizer(cleanup)
 
-#     return process
+    return process
 
 
 def test_response_ok():
