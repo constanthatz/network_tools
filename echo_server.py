@@ -43,8 +43,9 @@ def response_error():
 
 
 def parse_request(request):
-    method_line = request.splitlines()[0]
-    return method_line
+    mup_line = request.splitlines()[0]
+    mup = mup_line.split(' ')
+    return mup
 
 if __name__ == '__main__':
     server_socket_function()
