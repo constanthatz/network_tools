@@ -4,6 +4,8 @@
 
 *Feb 9th, 2015* - Added scripts for a basic echo server and client:
 
+*Feb 10th, 2015* - Added scripts for basic HTTP request and response:
+
 Collaborations:
 Constantine Hatzis
 
