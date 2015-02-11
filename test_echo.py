@@ -22,12 +22,11 @@ def server(request):
 def test_response_ok():
     ''' Test ok response message. '''
     first_line = 'HTTP/1.1 200 OK'
-    timestamp = email.utils.formatdate(usegmt=True)
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
-    crlf = '<CRLF>'
-    response = ('{}\nDate: {}\n{}\n{}').format(
-        first_line, timestamp, content_header, crlf)
-    assert es.response_ok() == response
+    body = '200 OK'
+    response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
+    assert es.response_ok() == '\r\n'.join(response_list)
 
 
 def test_response_error():
@@ -35,12 +34,11 @@ def test_response_error():
     error_code = '404'
     error_message = 'Not Found'
     first_line = 'HTTP/1.1 {} {}'.format(error_code, error_message)
-    timestamp = email.utils.formatdate(usegmt=True)
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
-    crlf = '<CRLF>'
-    response = ('{}\nDate: {}\n{}\n{}').format(
-        first_line, timestamp, content_header, crlf)
-    assert es.response_error(error_code, error_message) == response
+    body = '{} {}'.format(error_code, error_message)
+    response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
+    assert es.response_error(error_code, error_message) == '\r\n'.join(response_list)
 
 
 def test_parse_request_uri():
@@ -48,14 +46,11 @@ def test_parse_request_uri():
     method = 'GET'
     uri = '/index.html'
     protocol = 'HTTP/1.1'
+    first_line = '{} {} {}'.format(method, uri, protocol)
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     header = 'Host: www.example.com'
-    crlf = '<CRLF>'
-    client_request = '{} {} {}\n{}\n{}'.format(method,
-                                               uri,
-                                               protocol,
-                                               header,
-                                               crlf)
-    assert es.parse_request(client_request) == '/index.html'
+    client_request = [first_line, timestamp, header, ' ', '\r\n']
+    assert es.parse_request('\r\n'.join(client_request)) == '/index.html'
 
 
 def test_parse_request_405():
@@ -63,21 +58,19 @@ def test_parse_request_405():
     method = 'PUSH'
     uri = '/index.html'
     protocol = 'HTTP/1.1'
+    first_line = '{} {} {}'.format(method, uri, protocol)
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     header = 'Host: www.example.com'
-    crlf = '<CRLF>'
-    client_request = '{} {} {}\n{}\n{}'.format(method,
-                                               uri,
-                                               protocol,
-                                               header,
-                                               crlf)
+    client_request = [first_line, timestamp, header, ' ', '\r\n']
 
-    first_line = 'HTTP/1.1 405 Method Not Allowed'
-    timestamp = email.utils.formatdate(usegmt=True)
+    error_code = '405'
+    error_message = 'Method Not Allowed'
+    first_line = 'HTTP/1.1 {} {}'.format(error_code, error_message)
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
-    crlf = '<CRLF>'
-    response = ('{}\nDate: {}\n{}\n{}').format(
-        first_line, timestamp, content_header, crlf)
-    assert es.parse_request(client_request) == response
+    body = '{} {}'.format(error_code, error_message)
+    response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
+    assert es.parse_request('\r\n'.join(client_request)) == '\r\n'.join(response_list)
 
 
 def test_parse_request_505():
@@ -85,21 +78,19 @@ def test_parse_request_505():
     method = 'GET'
     uri = '/index.html'
     protocol = 'HTTP/1.0'
+    first_line = '{} {} {}'.format(method, uri, protocol)
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     header = 'Host: www.example.com'
-    crlf = '<CRLF>'
-    client_request = '{} {} {}\n{}\n{}'.format(method,
-                                               uri,
-                                               protocol,
-                                               header,
-                                               crlf)
+    client_request = [first_line, timestamp, header, ' ', '\r\n']
 
-    first_line = 'HTTP/1.1 505 HTTP Version Not Supported'
-    timestamp = email.utils.formatdate(usegmt=True)
+    error_code = '505'
+    error_message = 'HTTP Version Not Supported'
+    first_line = 'HTTP/1.1 {} {}'.format(error_code, error_message)
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
-    crlf = '<CRLF>'
-    response = ('{}\nDate: {}\n{}\n{}').format(
-        first_line, timestamp, content_header, crlf)
-    assert es.parse_request(client_request) == response
+    body = '{} {}'.format(error_code, error_message)
+    response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
+    assert es.parse_request('\r\n'.join(client_request)) == '\r\n'.join(response_list)
 
 
 def test_client_socket_function_ok():
@@ -107,17 +98,14 @@ def test_client_socket_function_ok():
     method = 'GET'
     uri = '/index.html'
     protocol = 'HTTP/1.1'
+    first_line = '{} {} {}'.format(method, uri, protocol)
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     header = 'Host: www.example.com'
-    crlf = '<CRLF>'
-    client_request = '{} {} {}\n{}\n{}'.format(method,
-                                               uri,
-                                               protocol,
-                                               header,
-                                               crlf)
+    client_request = [first_line, timestamp, header, ' ', '\r\n']
 
     response = uri
 
-    recieve = ec.client_socket_function(client_request)
+    recieve = ec.client_socket_function('\r\n'.join(client_request))
     assert recieve == response
 
 
@@ -126,23 +114,21 @@ def test_client_socket_function_405():
     method = 'PUSH'
     uri = '/index.html'
     protocol = 'HTTP/1.1'
+    first_line = '{} {} {}'.format(method, uri, protocol)
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     header = 'Host: www.example.com'
-    crlf = '<CRLF>'
-    client_request = '{} {} {}\n{}\n{}'.format(method,
-                                               uri,
-                                               protocol,
-                                               header,
-                                               crlf)
+    client_request = [first_line, timestamp, header, ' ', '\r\n']
 
-    first_line = 'HTTP/1.1 405 Method Not Allowed'
-    timestamp = email.utils.formatdate(usegmt=True)
+    error_code = '405'
+    error_message = 'Method Not Allowed'
+    first_line = 'HTTP/1.1 {} {}'.format(error_code, error_message)
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
-    crlf = '<CRLF>'
-    response = ('{}\nDate: {}\n{}\n{}').format(
-        first_line, timestamp, content_header, crlf)
+    body = '{} {}'.format(error_code, error_message)
+    response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
 
-    recieve = ec.client_socket_function(client_request)
-    assert recieve == response
+    recieve = ec.client_socket_function('\r\n'.join(client_request))
+    assert recieve == '\r\n'.join(response_list)
 
 
 def test_client_socket_function_505():
@@ -150,20 +136,18 @@ def test_client_socket_function_505():
     method = 'GET'
     uri = '/index.html'
     protocol = 'HTTP/1.0'
+    first_line = '{} {} {}'.format(method, uri, protocol)
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     header = 'Host: www.example.com'
-    crlf = '<CRLF>'
-    client_request = '{} {} {}\n{}\n{}'.format(method,
-                                               uri,
-                                               protocol,
-                                               header,
-                                               crlf)
+    client_request = [first_line, timestamp, header, ' ', '\r\n']
 
-    first_line = 'HTTP/1.1 505 HTTP Version Not Supported'
-    timestamp = email.utils.formatdate(usegmt=True)
+    error_code = '505'
+    error_message = 'HTTP Version Not Supported'
+    first_line = 'HTTP/1.1 {} {}'.format(error_code, error_message)
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
-    crlf = '<CRLF>'
-    response = ('{}\nDate: {}\n{}\n{}').format(
-        first_line, timestamp, content_header, crlf)
+    body = '{} {}'.format(error_code, error_message)
+    response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
 
-    recieve = ec.client_socket_function(client_request)
-    assert recieve == response
+    recieve = ec.client_socket_function('\r\n'.join(client_request))
+    assert recieve == '\r\n'.join(response_list)
