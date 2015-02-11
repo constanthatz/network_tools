@@ -59,3 +59,7 @@ def test_response_error():
     response = ('{}\nDate: {}\n{}\n{}').format(
         first_line, timestamp, content_header, crlf)
     assert es.response_error() == response
+
+
+def test_parse_request():
+    assert es.parse_request('Hello\nWorld\n') == 'Hello'
