@@ -14,14 +14,16 @@ def client_socket_function(message):
     client_socket.shutdown(socket.SHUT_WR)
 
     recieve_total = ""
-    buffersize = 32
+    buffersize = 4096
     finished = 0
     while not finished:
         recieve = client_socket.recv(buffersize)
         if len(recieve) < buffersize:
+            recieve_total += recieve
             client_socket.close()
             finished = 1
-        recieve_total += recieve
+        else:
+            recieve_total += recieve
 
     return recieve_total
 

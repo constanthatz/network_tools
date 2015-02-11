@@ -5,36 +5,18 @@ import pytest
 import email.utils
 
 
-@pytest.fixture(scope='module')
-def server(request):
-    """set up and tear down a server"""
+# @pytest.fixture(scope='module')
+# def server(request):
+#     """set up and tear down a server"""
 
-    process = subprocess.Popen('./echo_server.py', shell=True)
+#     process = subprocess.Popen('./echo_server.py', shell=True)
 
-    def cleanup():
-        process.kill()
+#     def cleanup():
+#         process.kill()
 
-    request.addfinalizer(cleanup)
+#     request.addfinalizer(cleanup)
 
-    return process
-
-
-def test_client_socket_function_short():
-    ''' 16 byte message. Short response'''
-    recieve = ec.client_socket_function("Can you hear me?")
-    assert recieve == "I recieved your message. Stop talking to me. You are annoying."
-
-
-def test_client_socket_function_long():
-    ''' 74 byte message. '''
-    recieve = ec.client_socket_function("Can you hear me? I am waiting for you to respond. Come on, where are you?!")
-    assert recieve == "I recieved your message. Stop talking to me. You are annoying."
-
-
-def test_client_socket_function_unicode():
-    ''' Unicode. '''
-    recieve = ec.client_socket_function(u"Can you hear me? I am waiting for you to respond. Come on, where are you?!")
-    assert recieve == "I recieved your message. Stop talking to me. You are annoying."
+#     return process
 
 
 def test_response_ok():
@@ -68,7 +50,11 @@ def test_parse_request_uri():
     protocol = 'HTTP/1.1'
     header = 'Host: www.example.com'
     crlf = '<CRLF>'
-    request = '{} {} {}\n{}\n{}'.format(method, uri, protocol, header, crlf)
+    request = '{} {} {}\n{}\n{}'.format(method,
+                                        uri,
+                                        protocol,
+                                        header,
+                                        crlf)
     assert es.parse_request(request) == '/index.html'
 
 
@@ -79,7 +65,11 @@ def test_parse_request_405():
     protocol = 'HTTP/1.1'
     header = 'Host: www.example.com'
     crlf = '<CRLF>'
-    request = '{} {} {}\n{}\n{}'.format(method, uri, protocol, header, crlf)
+    request = '{} {} {}\n{}\n{}'.format(method,
+                                        uri,
+                                        protocol,
+                                        header,
+                                        crlf)
 
     first_line = 'HTTP/1.1 405 Method Not Allowed'
     timestamp = email.utils.formatdate(usegmt=True)
@@ -106,3 +96,70 @@ def test_parse_request_505():
     response = ('{}\nDate: {}\n{}\n{}').format(
         first_line, timestamp, content_header, crlf)
     assert es.parse_request(request) == response
+
+
+def test_client_socket_function_ok():
+    ''' Test a good request'''
+    method = 'GET'
+    uri = '/index.html'
+    protocol = 'HTTP/1.1'
+    header = 'Host: www.example.com'
+    crlf = '<CRLF>'
+    request = '{} {} {}\n{}\n{}'.format(method,
+                                        uri,
+                                        protocol,
+                                        header,
+                                        crlf)
+
+    response = uri
+
+    recieve = ec.client_socket_function(request)
+    assert recieve == response
+
+
+def test_client_socket_function_405():
+    ''' Test a 405 error'''
+    method = 'PUSH'
+    uri = '/index.html'
+    protocol = 'HTTP/1.1'
+    header = 'Host: www.example.com'
+    crlf = '<CRLF>'
+    request = '{} {} {}\n{}\n{}'.format(method,
+                                        uri,
+                                        protocol,
+                                        header,
+                                        crlf)
+
+    first_line = 'HTTP/1.1 405 Method Not Allowed'
+    timestamp = email.utils.formatdate(usegmt=True)
+    content_header = 'Content-Type: text/plain'
+    crlf = '<CRLF>'
+    response = ('{}\nDate: {}\n{}\n{}').format(
+        first_line, timestamp, content_header, crlf)
+
+    recieve = ec.client_socket_function(request)
+    assert recieve == response
+
+
+def test_client_socket_function_505():
+    ''' Test a 505 error'''
+    method = 'GET'
+    uri = '/index.html'
+    protocol = 'HTTP/1.0'
+    header = 'Host: www.example.com'
+    crlf = '<CRLF>'
+    request = '{} {} {}\n{}\n{}'.format(method,
+                                        uri,
+                                        protocol,
+                                        header,
+                                        crlf)
+
+    first_line = 'HTTP/1.1 505 HTTP Version Not Supported'
+    timestamp = email.utils.formatdate(usegmt=True)
+    content_header = 'Content-Type: text/plain'
+    crlf = '<CRLF>'
+    response = ('{}\nDate: {}\n{}\n{}').format(
+        first_line, timestamp, content_header, crlf)
+
+    recieve = ec.client_socket_function(request)
+    assert recieve == response
