@@ -31,7 +31,7 @@ def response_ok():
 
 
 def response_error(error_code, error_message):
-    first_line = 'HTTP/1.1 {} {}'.format(error_code, error_text)
+    first_line = 'HTTP/1.1 {} {}'.format(error_code, error_message)
     timestamp = email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
     crlf = '<CRLF>'
