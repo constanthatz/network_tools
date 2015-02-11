@@ -62,4 +62,11 @@ def test_response_error():
 
 
 def test_parse_request():
-    assert es.parse_request('Hello\nWorld\n') == 'Hello'
+    method = 'GET'
+    uri = '/index.html'
+    protocol = 'HTTP/1.1'
+    header = 'Host: www.example.com'
+    crlf = '<CRLF>'
+    request = '{} {} {}\n{}\n{}'.format(method, uri, protocol, header, crlf)
+
+    assert es.parse_request(request) == ['GET', '/index.html', 'HTTP/1.1']
