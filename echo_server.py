@@ -42,10 +42,9 @@ def response_error():
     return response
 
 
-def parse_request():
-    return
+def parse_request(request):
+    method_line = request.splitlines()[0]
+    return method_line
 
-print(response_ok())
-
-# if __name__ == '__main__':
-    # server_socket_function()
+if __name__ == '__main__':
+    server_socket_function()
