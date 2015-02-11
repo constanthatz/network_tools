@@ -38,7 +38,7 @@ def test_client_socket_function_unicode():
 
 
 def test_response_ok():
-    ''' Test ok response message'''
+    ''' Test ok response message. '''
     first_line = 'HTTP/1.1 200 OK'
     timestamp = email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
@@ -49,7 +49,7 @@ def test_response_ok():
 
 
 def test_response_error():
-    ''' Test error response message'''
+    ''' Test error response message. '''
     error_code = '404'
     error_message = 'Not Found'
     first_line = 'HTTP/1.1 {} {}'.format(error_code, error_message)
@@ -62,6 +62,7 @@ def test_response_error():
 
 
 def test_parse_request_uri():
+    ''' Test parse request with a good request. '''
     method = 'GET'
     uri = '/index.html'
     protocol = 'HTTP/1.1'
@@ -72,6 +73,7 @@ def test_parse_request_uri():
 
 
 def test_parse_request_405():
+    ''' Test parse request with a 405 error. '''
     method = 'PUSH'
     uri = '/index.html'
     protocol = 'HTTP/1.1'
@@ -89,6 +91,7 @@ def test_parse_request_405():
 
 
 def test_parse_request_505():
+    ''' Test parse request with a 505 error. '''
     method = 'GET'
     uri = '/index.html'
     protocol = 'HTTP/1.0'
