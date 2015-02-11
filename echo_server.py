@@ -30,9 +30,7 @@ def response_ok():
     return response
 
 
-def response_error():
-    error_code = '404'
-    error_text = 'Not Found'
+def response_error(error_code, error_message):
     first_line = 'HTTP/1.1 {} {}'.format(error_code, error_text)
     timestamp = email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
@@ -45,7 +43,13 @@ def response_error():
 def parse_request(request):
     mup_line = request.splitlines()[0]
     mup = mup_line.split(' ')
-    return mup
+
+    if mup[0] != 'GET':
+        response_error('405', 'Method Not Allowed')
+    elif mup[2] != 'HTTP/1.1':
+        response_error('505', 'HTTP Version Not Supported')
+
+    return mup[1]
 
 if __name__ == '__main__':
     server_socket_function()
