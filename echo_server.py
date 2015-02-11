@@ -46,8 +46,10 @@ def parse_request(request):
 
     if mup[0] != 'GET':
         response_error('405', 'Method Not Allowed')
+        return
     elif mup[2] != 'HTTP/1.1':
         response_error('505', 'HTTP Version Not Supported')
+        return
 
     return mup[1]
 
