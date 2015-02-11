@@ -51,22 +51,55 @@ def test_response_ok():
 def test_response_error():
     ''' Test error response message'''
     error_code = '404'
-    error_text = 'Not Found'
-    first_line = 'HTTP/1.1 {} {}'.format(error_code, error_text)
+    error_message = 'Not Found'
+    first_line = 'HTTP/1.1 {} {}'.format(error_code, error_message)
     timestamp = email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
     crlf = '<CRLF>'
     response = ('{}\nDate: {}\n{}\n{}').format(
         first_line, timestamp, content_header, crlf)
-    assert es.response_error() == response
+    assert es.response_error(error_code, error_message) == response
 
 
-def test_parse_request():
+def test_parse_request_uri():
     method = 'GET'
     uri = '/index.html'
     protocol = 'HTTP/1.1'
     header = 'Host: www.example.com'
     crlf = '<CRLF>'
     request = '{} {} {}\n{}\n{}'.format(method, uri, protocol, header, crlf)
+    assert es.parse_request(request) == '/index.html'
 
-    assert es.parse_request(request) == ['GET', '/index.html', 'HTTP/1.1']
+
+def test_parse_request_405():
+    method = 'PUSH'
+    uri = '/index.html'
+    protocol = 'HTTP/1.1'
+    header = 'Host: www.example.com'
+    crlf = '<CRLF>'
+    request = '{} {} {}\n{}\n{}'.format(method, uri, protocol, header, crlf)
+
+    first_line = 'HTTP/1.1 405 Method Not Allowed'
+    timestamp = email.utils.formatdate(usegmt=True)
+    content_header = 'Content-Type: text/plain'
+    crlf = '<CRLF>'
+    response = ('{}\nDate: {}\n{}\n{}').format(
+        first_line, timestamp, content_header, crlf)
+    assert es.parse_request(request) == response
+
+
+def test_parse_request_505():
+    method = 'GET'
+    uri = '/index.html'
+    protocol = 'HTTP/1.0'
+    header = 'Host: www.example.com'
+    crlf = '<CRLF>'
+    request = '{} {} {}\n{}\n{}'.format(method, uri, protocol, header, crlf)
+
+    first_line = 'HTTP/1.1 505 HTTP Version Not Supported'
+    timestamp = email.utils.formatdate(usegmt=True)
+    content_header = 'Content-Type: text/plain'
+    crlf = '<CRLF>'
+    response = ('{}\nDate: {}\n{}\n{}').format(
+        first_line, timestamp, content_header, crlf)
+    assert es.parse_request(request) == response
