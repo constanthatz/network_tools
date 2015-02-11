@@ -56,12 +56,25 @@ def parse_request(request):
     mup_line = request.splitlines()[0]
     mup = mup_line.split(' ')
 
-    if mup[0] != 'GET':
-        return response_error('405', 'Method Not Allowed')
-    elif mup[2] != 'HTTP/1.1':
-        return response_error('505', 'HTTP Version Not Supported')
+    answer = error_mup(mup)
 
-    return mup[1]
+    return answer
+
+
+def error_mup(mup):
+
+    http_response_codes = {'405': 'Method Not Allowed',
+                           '505': 'HTTP Version Not Supported'}
+
+    if mup[0] != 'GET':
+        error_key = '405'
+        return response_error(error_key, http_response_codes[error_key])
+    elif mup[2] != 'HTTP/1.1':
+        error_key = '505'
+        return response_error(error_key, http_response_codes[error_key])
+    else:
+        return mup[1]
+
 
 if __name__ == '__main__':
     server_socket_function()
