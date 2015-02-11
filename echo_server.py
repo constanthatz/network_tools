@@ -11,32 +11,23 @@ def server_socket_function():
     server_socket.bind(('127.0.0.1', 50000))
     server_socket.listen(1)
 
-    # try:
-    #     while True:
-    #         conn, addr = server_socket.accept()
-    #         recieve_total = ""
-    #         buffersize = 32
-    #         finished = 0
-    #         while not finished:
-    #             recieve = conn.recv(32)
-    #             recieve_total += recieve
-    #             if len(recieve) < buffersize:
-    #                 finished = 1
-    #             else:
-    #                 recieve_total += recieve
-    #         if recieve_total:
-    #             response = parse_request(recieve_total)
-    #             conn.sendall(response)
-    #         conn.close()
-    # except KeyboardInterrupt:
-    #     server_socket.close()
-
     try:
         while True:
             conn, addr = server_socket.accept()
-            message = conn.recv(4096)
-            if message:
-                response = parse_request(message)
+
+            recieve_total = ""
+            buffersize = 32
+            finished = 0
+            while not finished:
+                recieve = conn.recv(buffersize)
+                if len(recieve) < buffersize:
+                    recieve_total += recieve
+                    finished = 1
+                else:
+                    recieve_total += recieve
+
+            if recieve_total:
+                response = parse_request(recieve_total)
                 conn.sendall(response)
             conn.close()
     except KeyboardInterrupt:
