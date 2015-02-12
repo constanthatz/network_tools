@@ -29,7 +29,9 @@ def server_socket_function():
 
             if recieve_total:
                 try:
-                    response = parse_request(recieve_total)
+                    uri = parse_request(recieve_total)
+                    info = resolve_uri(uri)
+                    response_ok(info)
                 except RequestError, msg:
                     errors = str(msg).strip("'").split(' ', 1)
                     response = response_error(errors[0], errors[1])
@@ -39,12 +41,11 @@ def server_socket_function():
         server_socket.close()
 
 
-def response_ok():
+def response_ok(*args):
     first_line = 'HTTP/1.1 200 OK'
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
-    content_header = 'Content-Type: text/plain'
-    body = '200 OK'
-    response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
+    content_header = 'Content-Type: {}'.format(args[0])
+    response_list = [first_line, timestamp, content_header, ' ', args[1], '\r\n']
     return '\r\n'.join(response_list)
 
 
@@ -60,10 +61,8 @@ def response_error(error_code, error_message):
 def parse_request(client_request):
     mup_line = client_request.splitlines()[0]
     mup = mup_line.split(' ')
-
-    answer = error_mup(mup)
-
-    return answer
+    uri = error_mup(mup)
+    return uri
 
 
 def error_mup(mup):
@@ -85,12 +84,18 @@ def error_mup(mup):
 
 def resolve_uri(uri):
     if os.path.isdir(uri):
-        response = gen_list(uri)
+        body = gen_list(uri)
+        content_type = 'text/html'
+        info = (content_type, body)
     elif os.path.isfile(uri):
-        response = gen_text(uri)
+        body = gen_text(uri)
+        content_type = 'text/html'
+        info = (content_type, body)
     else:
-        raise EnvironmentError
-    return response
+        error_key = '404'
+        msg = "{} {}".format(error_key, 'Not Found')
+        raise RequestError(msg)
+    return info
 
 
 def gen_list(uri):
