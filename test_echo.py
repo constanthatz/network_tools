@@ -19,14 +19,34 @@ import email.utils
 #     return process
 
 
-def test_response_ok():
-    ''' Test ok response message. '''
+def test_response_ok_dir():
+    ''' Test ok response message to a dir request. '''
+    uri = 'webroot/'
+    body = es.gen_list(uri)
+    content_type = 'text/html'
+    info = (content_type, body)
     first_line = 'HTTP/1.1 200 OK'
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
-    content_header = 'Content-Type: text/plain'
-    body = '200 OK'
+    content_header = 'Content-Type: {}'.format(content_type)
+    body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(body)
     response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
-    assert es.response_ok() == '\r\n'.join(response_list)
+    assert es.response_ok(info) == '\r\n'.join(response_list)
+
+
+def test_response_ok_file():
+    ''' Test ok response message to a dir request. '''
+    uri = 'webroot/sample.txt'
+    fo = open(uri, "r")
+    body = fo.read();
+    fo.close()
+    content_type = 'text/html'
+    info = (content_type, body)
+    first_line = 'HTTP/1.1 200 OK'
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
+    content_header = 'Content-Type: {}'.format(content_type)
+    body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(body)
+    response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
+    assert es.response_ok(info) == '\r\n'.join(response_list)
 
 
 def test_response_error():
@@ -36,7 +56,8 @@ def test_response_error():
     first_line = 'HTTP/1.1 {} {}'.format(error_code, error_message)
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
-    body = '{} {}'.format(error_code, error_message)
+    body = '{} {}\n'.format(error_code, error_message)
+    body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(body)
     response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
     assert es.response_error(
         error_code, error_message) == '\r\n'.join(response_list)
@@ -57,17 +78,23 @@ def test_parse_request_uri():
 def test_client_socket_function_ok():
     ''' Test a good request'''
     method = 'GET'
-    uri = '/index.html'
+    uri = 'webroot/'
     protocol = 'HTTP/1.1'
     first_line = '{} {} {}'.format(method, uri, protocol)
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     header = 'Host: www.example.com'
     client_request = [first_line, timestamp, header, ' ', '\r\n']
 
-    response = uri
+    body = es.gen_list(uri)
+    content_type = 'text/html'
+    first_line = 'HTTP/1.1 200 OK'
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
+    content_header = 'Content-Type: {}'.format(content_type)
+    body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(body)
+    response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
 
     recieve = ec.client_socket_function('\r\n'.join(client_request))
-    assert recieve == response
+    assert recieve == '\r\n'.join(response_list)
 
 
 def test_client_socket_function_405():
@@ -85,7 +112,8 @@ def test_client_socket_function_405():
     first_line = 'HTTP/1.1 {} {}'.format(error_code, error_message)
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
-    body = '{} {}'.format(error_code, error_message)
+    body = '{} {}\n'.format(error_code, error_message)
+    body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(body)
     response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
 
     recieve = ec.client_socket_function('\r\n'.join(client_request))
@@ -107,11 +135,28 @@ def test_client_socket_function_505():
     first_line = 'HTTP/1.1 {} {}'.format(error_code, error_message)
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
-    body = '{} {}'.format(error_code, error_message)
+    body = '{} {}\n'.format(error_code, error_message)
+    body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(body)
     response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
 
     recieve = ec.client_socket_function('\r\n'.join(client_request))
     assert recieve == '\r\n'.join(response_list)
+
+
+def test_resolve_uri():
+    ''' Test a good dir uri '''
+    uri = 'webroot/'
+    body = es.gen_list(uri)
+    content_type = 'text/html'
+    info = (content_type, body)
+    assert es.resolve_uri(uri) == info
+
+    ''' Test a good file uri '''
+    uri = 'webroot/sample.txt'
+    body = es.gen_text(uri)
+    content_type = 'text/html'
+    info = (content_type, body)
+    assert es.resolve_uri(uri) == info
 
 
 class RequestError(Exception):
