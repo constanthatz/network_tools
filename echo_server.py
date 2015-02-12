@@ -27,7 +27,11 @@ def server_socket_function():
                     recieve_total += recieve
 
             if recieve_total:
-                response = parse_request(recieve_total)
+                try:
+                    response = parse_request(recieve_total)
+                except RequestError, msg:
+                    errors = str(msg).strip("'").split(' ', 1)
+                    response = response_error(errors[0], errors[1])
                 conn.sendall(response)
             conn.close()
     except KeyboardInterrupt:
@@ -52,8 +56,8 @@ def response_error(error_code, error_message):
     return '\r\n'.join(response_list)
 
 
-def parse_request(request):
-    mup_line = request.splitlines()[0]
+def parse_request(client_request):
+    mup_line = client_request.splitlines()[0]
     mup = mup_line.split(' ')
 
     answer = error_mup(mup)
@@ -68,13 +72,39 @@ def error_mup(mup):
 
     if mup[0] != 'GET':
         error_key = '405'
-        return response_error(error_key, http_response_codes[error_key])
+        msg = "{} {}".format(error_key, http_response_codes[error_key])
+        raise RequestError(msg)
     elif mup[2] != 'HTTP/1.1':
         error_key = '505'
-        return response_error(error_key, http_response_codes[error_key])
+        msg = "{} {}".format(error_key, http_response_codes[error_key])
+        raise RequestError(msg)
     else:
         return mup[1]
 
 
+class RequestError(Exception):
+    """Exception raised for errors in the request."""
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
 if __name__ == '__main__':
     server_socket_function()
+
+    # method = 'PUSH'
+    # uri = '/index.html'
+    # protocol = 'HTTP/1.1'
+    # first_line = '{} {} {}'.format(method, uri, protocol)
+    # timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
+    # header = 'Host: www.example.com'
+    # client_request = [first_line, timestamp, header, ' ', '\r\n']
+    # client_request = '\r\n'.join(client_request)
+    # try:
+    #     response = parse_request(client_request)
+    # except RequestError, msg:
+    #     errors = str(msg).strip("'").split(' ', 1)
+    #     response = response_error(errors[0], errors[1])
+    #     print(errors)

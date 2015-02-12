@@ -29,4 +29,3 @@ def client_socket_function(message):
 
 if __name__ == '__main__':
     recieve = client_socket_function(sys.argv[1])
-    print(recieve)
