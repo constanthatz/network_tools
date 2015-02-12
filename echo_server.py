@@ -31,7 +31,7 @@ def server_socket_function():
                 try:
                     uri = parse_request(recieve_total)
                     info = resolve_uri(uri)
-                    response_ok(info)
+                    response = response_ok(info)
                 except RequestError, msg:
                     errors = str(msg).strip("'").split(' ', 1)
                     response = response_error(errors[0], errors[1])
@@ -44,8 +44,9 @@ def server_socket_function():
 def response_ok(*args):
     first_line = 'HTTP/1.1 200 OK'
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
-    content_header = 'Content-Type: {}'.format(args[0])
-    response_list = [first_line, timestamp, content_header, ' ', args[1], '\r\n']
+    content_header = 'Content-Type: {}'.format(args[0][0])
+    body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(args[0][1])
+    response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
     return '\r\n'.join(response_list)
 
 
@@ -53,7 +54,8 @@ def response_error(error_code, error_message):
     first_line = 'HTTP/1.1 {} {}'.format(error_code, error_message)
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
-    body = '{} {}'.format(error_code, error_message)
+    body = '{} {}\n'.format(error_code, error_message)
+    body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(body)
     response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
     return '\r\n'.join(response_list)
 
@@ -66,7 +68,6 @@ def parse_request(client_request):
 
 
 def error_mup(mup):
-
     http_response_codes = {'405': 'Method Not Allowed',
                            '505': 'HTTP Version Not Supported'}
 
@@ -104,16 +105,14 @@ def gen_list(uri):
     for i in path_list:
         dir_list += "<li>"+i+"</li>\n"
     body = "<ul>\n{}</ul>\n".format(dir_list)
-    html = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(body)
-    return html
+    return body
 
 
 def gen_text(uri):
     fo = open(uri, "r")
-    file_text = fo.read();
+    body = fo.read();
     fo.close()
-    html = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(file_text)
-    return html
+    return body
 
 
 class RequestError(Exception):
@@ -127,4 +126,11 @@ class RequestError(Exception):
 
 if __name__ == '__main__':
     # server_socket_function()
-    print(resolve_uri())
+    path = 'webroot/sample.txt'
+    try:
+        info = resolve_uri(path)
+        response = response_ok(info)
+    except RequestError, msg:
+        errors = str(msg).strip("'").split(' ', 1)
+        response = response_error(errors[0], errors[1])
+    print(response)
