@@ -19,17 +19,20 @@ def server(request):
 
 def test_client_socket_function_short():
     ''' 16 byte message. Short response'''
-    recieve = client_socket_function("Can you hear me?")
-    assert recieve == "I recieved your message. Stop talking to me. You are annoying."
+    message = "Can you hear me?"
+    recieve = client_socket_function(message)
+    assert recieve == message
 
 
 def test_client_socket_function_long():
     ''' 74 byte message. '''
-    recieve = client_socket_function("Can you hear me? I am waiting for you to respond. Come on, where are you?!")
-    assert recieve == "I recieved your message. Stop talking to me. You are annoying."
+    message = "Can you hear me? I am waiting for you to respond. Come on, where are you?!"
+    recieve = client_socket_function(message)
+    assert recieve == message
 
 
 def test_client_socket_function_unicode():
     ''' Unicode. '''
-    recieve = client_socket_function(u"Can you hear me? I am waiting for you to respond. Come on, where are you?!")
-    assert recieve == "I recieved your message. Stop talking to me. You are annoying."
+    message = u"Can you hear me? I am waiting for you to respond. Come on, where are you?!"
+    recieve = client_socket_function(message)
+    assert recieve == message
