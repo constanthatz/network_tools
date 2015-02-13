@@ -1,8 +1,24 @@
 import http_client as ec
 import http_concurrent_server as es
 import subprocess
+import os
 import pytest
 import email.utils
+
+
+# @pytest.fixture(scope='module')
+# def server(request):
+#     """set up and tear down a server"""
+#     import multiprocessing
+
+#     p = multiprocessing.Process(target=es)
+#     p.start()
+#     # subprocess.Popen('./http_concurrent_server.py', shell=True)
+
+#     def cleanup(p=p):
+#         p.terminate()
+
+#     request.addfinalizer(cleanup)
 
 
 def test_response_ok_dir():
