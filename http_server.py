@@ -125,12 +125,4 @@ class RequestError(Exception):
         return repr(self.value)
 
 if __name__ == '__main__':
-    # server_socket_function()
-    path = 'webroot/sample.txt'
-    try:
-        info = resolve_uri(path)
-        response = response_ok(info)
-    except RequestError, msg:
-        errors = str(msg).strip("'").split(' ', 1)
-        response = response_error(errors[0], errors[1])
-    print(response)
+    server_socket_function()
