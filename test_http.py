@@ -1,22 +1,8 @@
-import echo_client as ec
-import echo_server as es
+import http_client as ec
+import http_concurrent_server as es
 import subprocess
 import pytest
 import email.utils
-
-
-# @pytest.fixture(scope='module')
-# def server(request):
-#     """set up and tear down a server"""
-
-#     process = subprocess.Popen('./echo_server.py', shell=True)
-
-#     def cleanup():
-#         process.kill()
-
-#     request.addfinalizer(cleanup)
-
-#     return process
 
 
 def test_response_ok_dir():
