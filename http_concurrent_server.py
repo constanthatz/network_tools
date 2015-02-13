@@ -33,7 +33,7 @@ def server(socket, address):
                             response = response_error(errors[0], errors[1])
                         socket.sendall(response)
                     else:
-                        socket.shutdown(socket.SHUT_RDWR)
+                        socket.close()
                         break
             finally:
                 socket.close()
