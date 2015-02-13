@@ -125,12 +125,10 @@ class RequestError(Exception):
         return repr(self.value)
 
 if __name__ == '__main__':
-    # server_socket_function()
-    path = 'webroot/sample.txt'
-    try:
-        info = resolve_uri(path)
-        response = response_ok(info)
-    except RequestError, msg:
-        errors = str(msg).strip("'").split(' ', 1)
-        response = response_error(errors[0], errors[1])
-    print(response)
+    from gevent.server import StreamServer
+    from gevent.monkey import patch_all
+    patch_all()
+    server = StreamServer(('127.0.0.1', 10000), echo)
+    print('Starting echo server on port 10000')
+    server.serve_forever()
+
