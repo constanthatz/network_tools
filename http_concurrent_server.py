@@ -3,24 +3,27 @@ from __future__ import print_function
 import socket
 import email.utils
 import os
+import sys
 
 
-def server_socket_function():
+def server(log_buffer=sys.stderr):
+    address = ('127.0.0.1', 50000)
     server_socket = socket.socket(socket.AF_INET,
                                   socket.SOCK_STREAM,
                                   socket.IPPROTO_IP)
-    server_socket.bind(('127.0.0.1', 50000))
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server_socket.bind(address)
     server_socket.listen(1)
+    buffersize = 32
 
     try:
         while True:
-            conn, addr = server_socket.accept()
 
+            conn, addr = server_socket.accept()
             recieve_total = ""
-            buffersize = 32
             finished = 0
             while not finished:
-                recieve = conn.recv(buffersize)
+                recieve = socket.recv(buffersize)
                 if len(recieve) < buffersize:
                     recieve_total += recieve
                     finished = 1
@@ -35,8 +38,9 @@ def server_socket_function():
                 except RequestError, msg:
                     errors = str(msg).strip("'").split(' ', 1)
                     response = response_error(errors[0], errors[1])
-                conn.sendall(response)
-            conn.close()
+                socket.sendall(response)
+            socket.close()
+            break
     except KeyboardInterrupt:
         server_socket.close()
 
@@ -128,7 +132,6 @@ if __name__ == '__main__':
     from gevent.server import StreamServer
     from gevent.monkey import patch_all
     patch_all()
-    server = StreamServer(('127.0.0.1', 10000), echo)
-    print('Starting echo server on port 10000')
+    server = StreamServer(('127.0.0.1', 50000), server)
+    print('Starting http server on port 50000')
     server.serve_forever()
-
