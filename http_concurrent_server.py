@@ -1,48 +1,44 @@
 #!/usr/bin/env python
 from __future__ import print_function
-import socket
 import email.utils
 import os
-import sys
 
 
-def server(log_buffer=sys.stderr):
-    address = ('127.0.0.1', 50000)
-    server_socket = socket.socket(socket.AF_INET,
-                                  socket.SOCK_STREAM,
-                                  socket.IPPROTO_IP)
-    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind(address)
-    server_socket.listen(1)
+def server(socket, address):
     buffersize = 32
 
     try:
         while True:
 
-            conn, addr = server_socket.accept()
-            recieve_total = ""
-            finished = 0
-            while not finished:
-                recieve = socket.recv(buffersize)
-                if len(recieve) < buffersize:
-                    recieve_total += recieve
-                    finished = 1
-                else:
-                    recieve_total += recieve
+            # conn, addr = server_socket.accept()
+            try:
+                while True:
+                    recieve_total = ""
+                    finished = 0
+                    while not finished:
+                        recieve = socket.recv(buffersize)
+                        if len(recieve) < buffersize:
+                            recieve_total += recieve
+                            finished = 1
+                        else:
+                            recieve_total += recieve
 
-            if recieve_total:
-                try:
-                    uri = parse_request(recieve_total)
-                    info = resolve_uri(uri)
-                    response = response_ok(info)
-                except RequestError, msg:
-                    errors = str(msg).strip("'").split(' ', 1)
-                    response = response_error(errors[0], errors[1])
-                socket.sendall(response)
-            socket.close()
-            break
+                    if recieve_total:
+                        try:
+                            uri = parse_request(recieve_total)
+                            info = resolve_uri(uri)
+                            response = response_ok(info)
+                        except RequestError, msg:
+                            errors = str(msg).strip("'").split(' ', 1)
+                            response = response_error(errors[0], errors[1])
+                        socket.sendall(response)
+                    else:
+                        socket.shutdown(socket.SHUT_RDWR)
+                        break
+            finally:
+                socket.close()
     except KeyboardInterrupt:
-        server_socket.close()
+        socket.close()
 
 
 def response_ok(*args):
