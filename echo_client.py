@@ -5,7 +5,9 @@ import sys
 
 
 def client_socket_function(message):
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_IP)
+    client_socket = socket.socket(socket.AF_INET,
+                                  socket.SOCK_STREAM,
+                                  socket.IPPROTO_IP)
     client_socket.connect(('127.0.0.1', 50000))
     client_socket.sendall(message)
     client_socket.shutdown(socket.SHUT_WR)
@@ -23,5 +25,5 @@ def client_socket_function(message):
     return recieve_total
 
 if __name__ == '__main__':
-    recieve = client_socket_funciton(sys.argv[1])
+    recieve = client_socket_function(sys.argv[1])
     print(recieve)
