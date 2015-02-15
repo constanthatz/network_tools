@@ -38,25 +38,6 @@ def server_socket_function():
         server_socket.close()
 
 
-def response_ok(*args):
-    first_line = 'HTTP/1.1 200 OK'
-    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
-    content_header = 'Content-Type: {}'.format(args[0][0])
-    body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(args[0][1])
-    response_list = [first_line, timestamp, content_header, '', body]
-    return '\r\n'.join(response_list)
-
-
-def response_error(error):
-    first_line = 'HTTP/1.1 {} {}'.format(error.code, error.msg)
-    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
-    content_header = 'Content-Type: text/html'
-    body = '{} {}\n'.format(error.code, error.msg)
-    body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(body)
-    response_list = [first_line, timestamp, content_header, '', body]
-    return '\r\n'.join(response_list)
-
-
 def parse_request(client_request):
     mup_line = client_request.splitlines()[0]
     mup = mup_line.split(' ')
@@ -113,6 +94,25 @@ def gen_text(uri):
     with open(uri, "rb") as fo:
         body = fo.read()
     return body
+
+
+def response_ok(*args):
+    first_line = 'HTTP/1.1 200 OK'
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
+    content_header = 'Content-Type: {}'.format(args[0][0])
+    body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(args[0][1])
+    response_list = [first_line, timestamp, content_header, '', body]
+    return '\r\n'.join(response_list)
+
+
+def response_error(error):
+    first_line = 'HTTP/1.1 {} {}'.format(error.code, error.msg)
+    timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
+    content_header = 'Content-Type: text/html'
+    body = '{} {}\n'.format(error.code, error.msg)
+    body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(body)
+    response_list = [first_line, timestamp, content_header, '', body]
+    return '\r\n'.join(response_list)
 
 
 class RequestError(Exception):
