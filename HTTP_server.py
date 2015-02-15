@@ -101,7 +101,8 @@ def response_ok(*args):
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: {}'.format(args[0][0])
     body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(args[0][1])
-    response_list = [first_line, timestamp, content_header, '', body]
+    content_length = 'Content-Length: {}'.format(len(body.encode('utf-8')))
+    response_list = [first_line, timestamp, content_header, content_length, '', body]
     return '\r\n'.join(response_list)
 
 
@@ -111,7 +112,8 @@ def response_error(error):
     content_header = 'Content-Type: text/html'
     body = '{} {}\n'.format(error.code, error.msg)
     body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(body)
-    response_list = [first_line, timestamp, content_header, '', body]
+    content_length = 'Content-Length: {}'.format(len(body.encode('utf-8')))
+    response_list = [first_line, timestamp, content_header, content_length, '', body]
     return '\r\n'.join(response_list)
 
 
