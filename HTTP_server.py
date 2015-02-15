@@ -18,23 +18,20 @@ def server_socket_function():
 
             recieve_total = ""
             buffersize = 32
-            finished = 0
+            finished = False
             while not finished:
                 recieve = conn.recv(buffersize)
                 if len(recieve) < buffersize:
-                    recieve_total += recieve
-                    finished = 1
-                else:
-                    recieve_total += recieve
+                    finished = True
+                recieve_total += recieve
 
             if recieve_total:
                 try:
                     uri = parse_request(recieve_total)
                     info = resolve_uri(uri)
                     response = response_ok(info)
-                except RequestError, msg:
-                    errors = str(msg).strip("'").split(' ', 1)
-                    response = response_error(errors[0], errors[1])
+                except RequestError as error:
+                    response = response_error(error)
                 conn.sendall(response)
             conn.close()
     except KeyboardInterrupt:
@@ -46,17 +43,17 @@ def response_ok(*args):
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: {}'.format(args[0][0])
     body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(args[0][1])
-    response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
+    response_list = [first_line, timestamp, content_header, '', body]
     return '\r\n'.join(response_list)
 
 
-def response_error(error_code, error_message):
-    first_line = 'HTTP/1.1 {} {}'.format(error_code, error_message)
+def response_error(error):
+    first_line = 'HTTP/1.1 {} {}'.format(error.code, error.msg)
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
-    content_header = 'Content-Type: text/plain'
-    body = '{} {}\n'.format(error_code, error_message)
+    content_header = 'Content-Type: text/html'
+    body = '{} {}\n'.format(error.code, error.msg)
     body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(body)
-    response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
+    response_list = [first_line, timestamp, content_header, '', body]
     return '\r\n'.join(response_list)
 
 
@@ -73,29 +70,33 @@ def error_mup(mup):
 
     if mup[0] != 'GET':
         error_key = '405'
-        msg = "{} {}".format(error_key, http_response_codes[error_key])
-        raise RequestError(msg)
+        raise RequestError(error_key, http_response_codes[error_key])
     elif mup[2] != 'HTTP/1.1':
         error_key = '505'
-        msg = "{} {}".format(error_key, http_response_codes[error_key])
-        raise RequestError(msg)
+        raise RequestError(error_key, http_response_codes[error_key])
     else:
         return mup[1]
 
 
 def resolve_uri(uri):
-    if os.path.isdir(uri):
-        body = gen_list(uri)
+    uri = uri.lstrip("/")
+    here = os.getcwd()
+    home = 'webroot'
+    webhome = os.path.join(here, home)
+
+    actual_path = os.path.join(webhome, uri)
+
+    if os.path.isdir(actual_path):
+        body = gen_list(actual_path)
         content_type = 'text/html'
         info = (content_type, body)
-    elif os.path.isfile(uri):
-        body = gen_text(uri)
+    elif os.path.isfile(actual_path):
+        body = gen_text(actual_path)
         content_type = 'text/html'
         info = (content_type, body)
     else:
         error_key = '404'
-        msg = "{} {}".format(error_key, 'Not Found')
-        raise RequestError(msg)
+        raise RequestError(error_key, 'Not Found')
     return info
 
 
@@ -109,20 +110,20 @@ def gen_list(uri):
 
 
 def gen_text(uri):
-    fo = open(uri, "r")
-    body = fo.read();
-    fo.close()
+    with open(uri, "rb") as fo:
+        body = fo.read()
     return body
 
 
 class RequestError(Exception):
     """Exception raised for errors in the request."""
 
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, code, msg):
+        self.code = code
+        self.msg = msg
 
     def __str__(self):
-        return repr(self.value)
+        return "{} {}".format(self.code, self.msg)
 
 if __name__ == '__main__':
     server_socket_function()
