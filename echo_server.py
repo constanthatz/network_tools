@@ -22,8 +22,6 @@ def server_socket_function():
                 if len(recieve) < buffersize:
                     recieve_total += recieve
                     finished = 1
-                else:
-                    recieve_total += recieve
 
             if recieve_total:
                 conn.sendall(recieve_total)
