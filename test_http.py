@@ -1,6 +1,5 @@
 import http_client as ec
 import http_server as es
-from http_server import server_socket_function
 import pytest
 
 
@@ -8,7 +7,7 @@ import pytest
 def start_server():
     """set up and tear down a server"""
     import threading
-    target = server_socket_function
+    target = es.start
     server_thread = threading.Thread(target=target)
     server_thread.daemon = True
     server_thread.start()
