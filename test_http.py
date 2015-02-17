@@ -1,5 +1,6 @@
 import http_client as ec
 import http_server as es
+from http_server import server_socket_function
 import pytest
 
 
@@ -7,7 +8,7 @@ import pytest
 def start_server():
     """set up and tear down a server"""
     import threading
-    target = es.start
+    target = server_socket_function
     server_thread = threading.Thread(target=target)
     server_thread.daemon = True
     server_thread.start()
@@ -16,11 +17,10 @@ def start_server():
 
 def test_response_ok():
     ''' Test ok response message. '''
-    body = '<li>Test</li>'
+    response = '200 OK'
     content_type = 'text/html'
-    info = (content_type, body)
-    actual = es.response_ok(info)
-    assert body in actual
+    actual = es.response_ok()
+    assert response in actual
     assert content_type in actual
 
 
