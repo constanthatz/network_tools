@@ -22,9 +22,8 @@ def server_socket_function():
                 recieve = conn.recv(buffersize)
                 if len(recieve) < buffersize:
                     recieve_total += recieve
-                    finished = 1
-                else:
-                    recieve_total += recieve
+                    finished = True
+                recieve_total += recieve
 
             if recieve_total:
                 try:
@@ -33,9 +32,9 @@ def server_socket_function():
                 except RequestError as error:
                     response = response_error(error)
                 conn.sendall(response)
-            conn.close()
+
     except KeyboardInterrupt:
-        server_socket.close()
+        conn.close()
 
 
 def response_ok():
