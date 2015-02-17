@@ -29,6 +29,7 @@ def server_socket_function():
             if recieve_total:
                 try:
                     response = parse_request(recieve_total)
+                    response = response_ok()
                 except RequestError as error:
                     response = response_error(error)
                 conn.sendall(response)
@@ -40,8 +41,8 @@ def server_socket_function():
 def response_ok():
     first_line = 'HTTP/1.1 200 OK'
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
-    content_header = 'Content-Type: text/plain'
-    body = '200 OK'
+    content_header = 'Content-Type: text/html'
+    body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format('200 OK')
     response_list = [first_line, timestamp, content_header, '', body, '\r\n']
     return '\r\n'.join(response_list)
 
@@ -51,6 +52,7 @@ def response_error(error):
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
     body = '{} {}'.format(error.code, error.msg)
+    body = '''<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n{}</body>\n</html>'''.format(body)
     response_list = [first_line, timestamp, content_header, '', body, '\r\n']
     return '\r\n'.join(response_list)
 
@@ -81,13 +83,13 @@ def error_mup(mup):
 
 class RequestError(Exception):
     """Exception raised for errors in the request."""
-
     def __init__(self, code, msg):
         self.code = code
         self.msg = msg
 
     def __str__(self):
         return "{} {}".format(self.code, self.msg)
+
 
 if __name__ == '__main__':
     server_socket_function()
