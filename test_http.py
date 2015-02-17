@@ -1,22 +1,9 @@
-import echo_client as ec
-import echo_server as es
+import http_client as ec
+import http_server as es
+from http_server import RequestError
 import subprocess
 import pytest
 import email.utils
-
-
-# @pytest.fixture(scope='module')
-# def server(request):
-#     """set up and tear down a server"""
-
-#     process = subprocess.Popen('./echo_server.py', shell=True)
-
-#     def cleanup():
-#         process.kill()
-
-#     request.addfinalizer(cleanup)
-
-#     return process
 
 
 def test_response_ok():
@@ -113,12 +100,3 @@ def test_client_socket_function_505():
     recieve = ec.client_socket_function('\r\n'.join(client_request))
     assert recieve == '\r\n'.join(response_list)
 
-
-class RequestError(Exception):
-    """Exception raised for errors in the request."""
-
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
