@@ -21,7 +21,6 @@ def server_socket_function():
             while not finished:
                 recieve = conn.recv(buffersize)
                 if len(recieve) < buffersize:
-                    recieve_total += recieve
                     finished = True
                 recieve_total += recieve
 
