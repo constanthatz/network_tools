@@ -1,9 +1,20 @@
 import http_client as ec
 import http_server as es
 from http_server import RequestError
-import subprocess
 import pytest
 import email.utils
+import os
+
+
+@pytest.yield_fixture(scope='module')
+def start_server():
+    """set up and tear down a server"""
+    import threading
+    target = es.start
+    server_thread = threading.Thread(target=target)
+    server_thread.daemon = True
+    server_thread.start()
+    yield
 
 
 def test_response_ok():
