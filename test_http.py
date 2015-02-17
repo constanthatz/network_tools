@@ -1,7 +1,18 @@
 import http_client as ec
-import http_concurrent_server as es
-import HTTP_server as hs
+import http_server as es
 import os
+import pytest
+
+
+@pytest.yield_fixture(scope='module')
+def start_server():
+    """set up and tear down a server"""
+    import threading
+    target = es.server_socket_function
+    server_thread = threading.Thread(target=target)
+    server_thread.daemon = True
+    server_thread.start()
+    yield
 
 
 def test_parse_request_uri():
@@ -35,12 +46,12 @@ def test_response_error():
 
 def test_gen_list():
     uri = os.path.join(os.getcwd(), 'webroot')
-    assert 'sample.txt' in hs.gen_list(uri)
+    assert 'sample.txt' in es.gen_list(uri)
 
 
 def test_gen_text():
     uri = os.path.join(os.getcwd(), 'webroot/sample.txt')
-    assert 'simple text file' in hs.gen_text(uri)
+    assert 'simple text file' in es.gen_text(uri)
 
 
 def test_resolve_uri_dir():
@@ -55,8 +66,8 @@ def test_resolve_uri_file():
     assert 'text/html' in es.resolve_uri(uri)
 
 
-def test_handler_ok():
-    ''' Test a 404'''
+def test_client_socket_function_ok(start_server):
+    ''' Test an OK response'''
     client_request = 'GET / HTTP/1.1\r\n'
     actual = ec.client_socket_function(client_request)
 
@@ -64,17 +75,7 @@ def test_handler_ok():
     assert 'OK' in actual
 
 
-def test_handler_404():
-    ''' Test a 404'''
-    client_request = 'GET /index.html HTTP/1.1\r\n'
-    error = {"code": '404', "msg": 'Not Found'}
-    actual = ec.client_socket_function(client_request)
-
-    assert error['code'] in actual
-    assert error['msg'] in actual
-
-
-def test_handler_405():
+def test_client_socket_function_405(start_server):
     ''' Test a 405 error'''
     client_request = 'PUSH /index.html HTTP/1.1\r\n'
     error = {"code": '405', "msg": 'Method Not Allowed'}
@@ -84,7 +85,7 @@ def test_handler_405():
     assert error['msg'] in actual
 
 
-def test_handler_505():
+def test_client_socket_function_505(start_server):
     ''' Test a 505 error'''
     client_request = 'GET /index.html HTTP/1.0\r\n'
     error = {"code": '505', "msg": 'HTTP Version Not Supported'}
