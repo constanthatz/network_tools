@@ -90,5 +90,13 @@ class RequestError(Exception):
         return "{} {}".format(self.code, self.msg)
 
 
+def start():
+    from gevent.server import StreamServer
+    from gevent.monkey import patch_all
+    patch_all()
+    server = StreamServer(('127.0.0.1', 50000), server_socket_function)
+    print('Starting http server on port 50000')
+    server.serve_forever()
+
 if __name__ == '__main__':
-    server_socket_function()
+    start()
