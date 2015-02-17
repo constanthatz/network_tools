@@ -29,9 +29,8 @@ def server_socket_function():
             if recieve_total:
                 try:
                     response = parse_request(recieve_total)
-                except RequestError, msg:
-                    errors = str(msg).strip("'").split(' ', 1)
-                    response = response_error(errors[0], errors[1])
+                except RequestError as error:
+                    response = response_error(error)
                 conn.sendall(response)
             conn.close()
     except KeyboardInterrupt:
@@ -47,11 +46,11 @@ def response_ok():
     return '\r\n'.join(response_list)
 
 
-def response_error(error_code, error_message):
-    first_line = 'HTTP/1.1 {} {}'.format(error_code, error_message)
+def response_error(error):
+    first_line = 'HTTP/1.1 {} {}'.format(error.code, error.msg)
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
-    body = '{} {}'.format(error_code, error_message)
+    body = '{} {}'.format(error.code, error.msg)
     response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
     return '\r\n'.join(response_list)
 
@@ -72,12 +71,10 @@ def error_mup(mup):
 
     if mup[0] != 'GET':
         error_key = '405'
-        msg = "{} {}".format(error_key, http_response_codes[error_key])
-        raise RequestError(msg)
+        raise RequestError(error_key, http_response_codes[error_key])
     elif mup[2] != 'HTTP/1.1':
         error_key = '505'
-        msg = "{} {}".format(error_key, http_response_codes[error_key])
-        raise RequestError(msg)
+        raise RequestError(error_key, http_response_codes[error_key])
     else:
         return mup[1]
 
@@ -85,11 +82,12 @@ def error_mup(mup):
 class RequestError(Exception):
     """Exception raised for errors in the request."""
 
-    def __init__(self, value):
-        self.value = value
+    def __init__(self, code, msg):
+        self.code = code
+        self.msg = msg
 
     def __str__(self):
-        return repr(self.value)
+        return "{} {}".format(self.code, self.msg)
 
 if __name__ == '__main__':
     server_socket_function()
