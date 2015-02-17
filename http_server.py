@@ -42,7 +42,7 @@ def response_ok():
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
     body = '200 OK'
-    response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
+    response_list = [first_line, timestamp, content_header, '', body, '\r\n']
     return '\r\n'.join(response_list)
 
 
@@ -51,7 +51,7 @@ def response_error(error):
     timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
     content_header = 'Content-Type: text/plain'
     body = '{} {}'.format(error.code, error.msg)
-    response_list = [first_line, timestamp, content_header, ' ', body, '\r\n']
+    response_list = [first_line, timestamp, content_header, '', body, '\r\n']
     return '\r\n'.join(response_list)
 
 
@@ -91,18 +91,3 @@ class RequestError(Exception):
 
 if __name__ == '__main__':
     server_socket_function()
-
-    # method = 'PUSH'
-    # uri = '/index.html'
-    # protocol = 'HTTP/1.1'
-    # first_line = '{} {} {}'.format(method, uri, protocol)
-    # timestamp = 'Date: ' + email.utils.formatdate(usegmt=True)
-    # header = 'Host: www.example.com'
-    # client_request = [first_line, timestamp, header, ' ', '\r\n']
-    # client_request = '\r\n'.join(client_request)
-    # try:
-    #     response = parse_request(client_request)
-    # except RequestError, msg:
-    #     errors = str(msg).strip("'").split(' ', 1)
-    #     response = response_error(errors[0], errors[1])
-    #     print(errors)
