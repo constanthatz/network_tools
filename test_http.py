@@ -63,7 +63,7 @@ def test_resolve_uri_dir():
 def test_resolve_uri_file():
     ''' Test a good file uri '''
     uri = ('sample.txt')
-    assert 'text/html' in es.resolve_uri(uri)
+    assert 'text/plain' in es.resolve_uri(uri)
 
 
 def test_client_socket_function_ok(start_server):
